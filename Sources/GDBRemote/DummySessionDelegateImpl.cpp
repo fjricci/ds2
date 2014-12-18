@@ -109,7 +109,15 @@ ErrorCode DummySessionDelegateImpl::onQueryHostInfo(Session &, HostInfo &info) {
 
   info.endian = Platform::GetEndian();
   info.pointerSize = Platform::GetPointerSize();
+#if defined(__OSMETA__) && defined(OSMETA_PLATFORM_TIZEN)
+  //
+  // DNS servers are configure improperly on Tizen phones which results in
+  // timeouts on the LLDB side if we sit in this call for too long.
+  //
+  info.hostName = Platform::GetHostName(/*fqdn=*/false);
+#else
   info.hostName = Platform::GetHostName(/*fqdn=*/true);
+#endif
 
   return kSuccess;
 }
