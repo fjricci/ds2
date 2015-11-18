@@ -14,6 +14,8 @@
 #include "DebugServer2/Utils/Log.h"
 #include "DebugServer2/Utils/SwapEndian.h"
 
+#include "RegsGen2/JSObjects.h"
+
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
@@ -249,6 +251,66 @@ std::string StopCode::encodeRegisters() const {
   }
 
   return ss.str();
+}
+
+JSDictionary *StopCode::encodeJson() const {
+  JSDictionary *threadObj = JSDictionary::New();
+
+  threadObj->set("tid", JSInteger::New(ptid.tid));
+
+  if (!threadName.empty())
+    threadObj->set("name", JSString::New(threadName));
+
+  if (core)
+    threadObj->set("core", JSInteger::New(core));
+
+  std::string reasonStr;
+  switch (reason) {
+  case StopInfo::kReasonNone:
+    reasonStr = "none";
+    break;
+  case StopInfo::kReasonTrace:
+    reasonStr = "trace";
+    break;
+  case StopInfo::kReasonBreakpoint:
+    reasonStr = "breakpoint";
+    break;
+  case StopInfo::kReasonSignalStop:
+    reasonStr = "signal";
+    break;
+  case StopInfo::kReasonTrap:
+    reasonStr = "trap";
+    break;
+  case StopInfo::kReasonException:
+    reasonStr = "exception";
+    break;
+  default:
+    break;
+  }
+
+  threadObj->set("reason", JSString::New(reasonStr));
+
+  JSDictionary *regSet = JSDictionary::New();
+  for (auto &regval : registers) {
+    size_t regsize = regval.second.size << 3;
+
+    std::ostringstream keyStream;
+    std::ostringstream valStream;
+    keyStream << std::dec << regval.first;
+    valStream << HEX(regsize >> 2)
+#if defined(ENDIAN_BIG)
+    << regval.second.value
+#else
+    << (Swap64(regval.second.value) >> (64 - regsize))
+#endif
+    ;
+
+    regSet->set(keyStream.str(), JSString::New(valStream.str()));
+  }
+
+  threadObj->set("registers", regSet);
+
+  return threadObj;
 }
 
 std::string StopCode::encode(CompatibilityMode mode) const {

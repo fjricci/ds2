@@ -58,6 +58,7 @@ public:
 
 public:
   void dump(FILE *fp = stderr, size_t indent = 0) const;
+  std::string toString() const;
 
 protected:
   static inline void Indent(FILE *fp, size_t n);
@@ -67,6 +68,7 @@ protected:
   friend class JSArray;
   friend class JSDictionary;
   virtual void dump1(FILE *fp, size_t indent, size_t cindent) const = 0;
+  virtual std::string toString1() const = 0;
 };
 
 template <typename T> static inline T *JSCastTo(JSObject *obj) {
@@ -117,6 +119,7 @@ public:
 
 protected:
   virtual void dump1(FILE *fp, size_t indent, size_t) const;
+  virtual std::string toString1() const;
 };
 
 class JSReal : public JSObject {
@@ -151,6 +154,7 @@ public:
 
 protected:
   virtual void dump1(FILE *fp, size_t indent, size_t) const;
+  virtual std::string toString1() const;
 };
 
 class JSString : public JSObject {
@@ -187,6 +191,7 @@ public:
 
 protected:
   virtual void dump1(FILE *fp, size_t indent, size_t) const;
+  virtual std::string toString1() const;
 };
 
 class JSBoolean : public JSObject {
@@ -232,6 +237,7 @@ public:
 
 protected:
   virtual void dump1(FILE *fp, size_t indent, size_t) const;
+  virtual std::string toString1() const;
 };
 
 class JSNull : public JSObject {
@@ -269,6 +275,7 @@ public:
 
 protected:
   virtual void dump1(FILE *fp, size_t indent, size_t) const;
+  virtual std::string toString1() const;
 };
 
 class JSArray : public JSObject {
@@ -338,6 +345,7 @@ public:
 
 public:
   virtual void dump1(FILE *fp, size_t, size_t cindent) const;
+  virtual std::string toString1() const;
 };
 
 class JSDictionary : public JSObject {
@@ -421,6 +429,7 @@ public:
 
 protected:
   virtual void dump1(FILE *fp, size_t, size_t cindent) const;
+  virtual std::string toString1() const;
 
 public:
   static JSDictionary *Parse(std::string const &path);

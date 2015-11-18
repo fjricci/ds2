@@ -10,8 +10,11 @@
 
 #include "JSObjects.h"
 
+#include <cstdlib>
 #include <cassert>
 #include <csetjmp>
+
+#include <sstream>
 
 //
 // JSObject
@@ -79,6 +82,10 @@ void JSObject::dump(FILE *fp, size_t indent) const {
   }
 }
 
+std::string JSObject::toString() const {
+  return toString1();
+}
+
 inline void JSObject::Indent(FILE *fp, size_t n) {
   fprintf(fp, "%*s", static_cast<int>(n * 4), "");
 }
@@ -115,6 +122,12 @@ void JSInteger::dump1(FILE *fp, size_t indent, size_t) const {
 #endif
 }
 
+std::string JSInteger::toString1() const {
+  std::ostringstream ss;
+  ss << value();
+  return ss.str();
+}
+
 //
 // JSReal
 //
@@ -122,6 +135,12 @@ void JSInteger::dump1(FILE *fp, size_t indent, size_t) const {
 void JSReal::dump1(FILE *fp, size_t indent, size_t) const {
   JSObject::Indent(fp, indent);
   fprintf(fp, "%g", value());
+}
+
+std::string JSReal::toString1() const {
+  std::ostringstream ss;
+  ss << value();
+  return ss.str();
 }
 
 //
@@ -133,6 +152,10 @@ void JSString::dump1(FILE *fp, size_t indent, size_t) const {
   fprintf(fp, "\"%s\"", JSObject::QuoteString(value()).c_str());
 }
 
+std::string JSString::toString1() const {
+  return "\"" + JSObject::QuoteString(value()) + "\"";
+}
+
 //
 // JSBoolean
 //
@@ -142,6 +165,10 @@ void JSBoolean::dump1(FILE *fp, size_t indent, size_t) const {
   fprintf(fp, "%s", value() ? "true" : "false");
 }
 
+std::string JSBoolean::toString1() const {
+  return value() ? "true" : "false";
+}
+
 //
 // JSNull
 //
@@ -149,6 +176,10 @@ void JSBoolean::dump1(FILE *fp, size_t indent, size_t) const {
 void JSNull::dump1(FILE *fp, size_t indent, size_t) const {
   JSObject::Indent(fp, indent);
   fprintf(fp, "null");
+}
+
+std::string JSNull::toString1() const {
+  return "null";
 }
 
 //
@@ -177,6 +208,22 @@ void JSArray::dump1(FILE *fp, size_t, size_t cindent) const {
   fputc(']', fp);
 }
 
+std::string JSArray::toString1() const {
+  std::ostringstream ss;
+
+  ss << '[';
+
+  for (auto i = begin(); i != end(); ++i) {
+    if (i != begin()) {
+      ss << ",";
+    }
+    ss << i->get()->toString1();
+  }
+
+  ss << ']';
+  return ss.str();
+}
+
 //
 // JSDictionary
 //
@@ -200,6 +247,22 @@ void JSDictionary::dump1(FILE *fp, size_t, size_t cindent) const {
   }
 
   fputc('}', fp);
+}
+
+std::string JSDictionary::toString1() const {
+  std::ostringstream ss;
+  ss << '{';
+
+  for (auto i = begin(); i != end(); ++i) {
+    if (i != begin()) {
+      ss << ",";
+    }
+    ss << "\"" << JSObject::QuoteString(*i) << "\":";
+    ss << value(*i)->toString1();
+  }
+
+  ss << '}';
+  return ss.str();
 }
 
 //
@@ -398,7 +461,8 @@ JSDictionary *JSDictionary::Parse(
     return nullptr;
   }
 
-  json_fparse(fp, &_json_vb, &root, _json_err, &ectx);
+  assert(0); //TODO(fjricci) FIXME
+//  json_fparse(fp, &_json_vb, &root, _json_err, &ectx);
   return root;
 }
 

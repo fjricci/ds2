@@ -160,6 +160,7 @@ set(SUPPORT_COMMON_SOURCES
     Sources/MessageQueue.cpp
     Sources/Utils/Log.cpp
     Sources/Utils/OptParse.cpp
+    Tools/RegsGen2/JSObjects.cpp
     )
 
 set(SUPPORT_POSIX_SOURCES
@@ -200,6 +201,8 @@ add_executable(ds2 ${DEBUGSERVER2_SOURCES})
 
 include_directories(Headers)
 include_directories(Main)
+include_directories(Tools)
+include_directories(Tools/RegsGen2/libjson)
 
 if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DSTRICT /wd4244 /wd4996")

@@ -15,6 +15,8 @@
 #include "DebugServer2/GDBRemote/Base.h"
 #include "DebugServer2/Types.h"
 
+#include "RegsGen2/JSObjects.h"
+
 #include <set>
 
 namespace ds2 {
@@ -59,6 +61,7 @@ public:
 
 public:
   std::string encode(CompatibilityMode mode) const;
+  JSDictionary *encodeJson() const;
 
 private:
   std::string encodeInfo(CompatibilityMode mode) const;
