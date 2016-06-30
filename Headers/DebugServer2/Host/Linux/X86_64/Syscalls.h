@@ -42,6 +42,9 @@ static uint8_t const gMunmapCode[] = {
 };
 }
 
+#if defined(__clang__)
+__attribute__((no_sanitize("alignment")))
+#endif
 static inline void PrepareMmapCode(size_t size, uint32_t protection,
                                    ByteVector &codestr) {
   codestr.assign(&gMmapCode[0], &gMmapCode[sizeof(gMmapCode)]);
@@ -53,6 +56,9 @@ static inline void PrepareMmapCode(size_t size, uint32_t protection,
   *reinterpret_cast<uint32_t *>(code + 0x1b) = MAP_ANON | MAP_PRIVATE;
 }
 
+#if defined(__clang__)
+__attribute__((no_sanitize("alignment")))
+#endif
 static inline void PrepareMunmapCode(uint64_t address, size_t size,
                                      ByteVector &codestr) {
   codestr.assign(&gMunmapCode[0], &gMunmapCode[sizeof(gMunmapCode)]);
